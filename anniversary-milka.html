@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>1 год нам — Милка</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #050508;
+    --accent: #e06b8a;
+    --accent2: #9b3d5c;
+    --gold: #e0b87a;
+    --text: #f8f4ef;
+    --muted: #a89f97;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== FILM GRAIN + VIGNETTE ===== */
+.grain {
+    position: fixed; inset: 0; z-index: 90;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px;
+    animation: grain 0.5s steps(2) infinite;
+}
+@keyframes grain {
+    0%, 100% { transform: translate(0,0); }
+    10% { transform: translate(-2%, -3%); }
+    30% { transform: translate(3%, 2%); }
+    50% { transform: translate(-1%, 4%); }
+    70% { transform: translate(2%, -2%); }
+    90% { transform: translate(-3%, 1%); }
+}
+.vignette {
+    position: fixed; inset: 0; z-index: 89;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+}
+
+/* ===== PARTICLES ===== */
+#particles {
+    position: fixed; inset: 0; z-index: 1;
+    pointer-events: none;
+}
+
+/* ===== SLIDES ===== */
+.slides {
+    position: relative;
+    width: 100%; height: 100%;
+    z-index: 2;
+}
+
+.slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 48px 28px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    text-align: center;
+    overflow: hidden;
+}
+
+.slide.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* --- Transition variants --- */
+.slide.tr-fade {
+    transition: opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.6s;
+}
+.slide.tr-fade.exit {
+    opacity: 0;
+}
+
+.slide.tr-scale {
+    transform: scale(1.08);
+    filter: blur(8px);
+    transition: opacity 1.7s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 1.7s cubic-bezier(0.22, 1, 0.36, 1),
+                filter 1.7s cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 1.7s;
+}
+.slide.tr-scale.active {
+    transform: scale(1);
+    filter: blur(0);
+}
+.slide.tr-scale.exit {
+    opacity: 0;
+    transform: scale(0.92);
+    filter: blur(6px);
+}
+
+.slide.tr-slide-up {
+    transform: translateY(70px);
+    transition: opacity 1.5s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 1.5s cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 1.5s;
+}
+.slide.tr-slide-up.active {
+    transform: translateY(0);
+}
+.slide.tr-slide-up.exit {
+    opacity: 0;
+    transform: translateY(-40px);
+}
+
+.slide.tr-zoom {
+    transform: scale(0.88);
+    transition: opacity 1.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 1.8s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 1.8s;
+}
+.slide.tr-zoom.active {
+    transform: scale(1);
+}
+.slide.tr-zoom.exit {
+    opacity: 0;
+    transform: scale(1.12);
+}
+
+/* ===== TYPOGRAPHY ===== */
+.big-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.4rem, 13vw, 7.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 18px;
+}
+.big-title span { color: var(--accent); }
+
+.subtitle {
+    font-size: clamp(1.1rem, 3.5vw, 1.65rem);
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 1.5px;
+}
+
+.date-label {
+    font-size: 0.82rem;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+    opacity: 0.9;
+}
+
+/* ===== ANIMATED TEXT REVEAL ===== */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 1.1s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.slide.active .reveal { opacity: 1; transform: translateY(0); }
+.slide.active .reveal.d1 { transition-delay: 0.25s; }
+.slide.active .reveal.d2 { transition-delay: 0.5s; }
+.slide.active .reveal.d3 { transition-delay: 0.75s; }
+.slide.active .reveal.d4 { transition-delay: 1.0s; }
+.slide.active .reveal.d5 { transition-delay: 1.25s; }
+.slide.active .reveal.d6 { transition-delay: 1.5s; }
+.slide.active .reveal.d7 { transition-delay: 1.75s; }
+
+/* ===== PHOTO ===== */
+.photo-wrap {
+    width: min(78vw, 400px);
+    aspect-ratio: 3/4;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.06);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 1.6s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.slide.active .photo-wrap {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.photo-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.12);
+    transition: transform 9s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.slide.active .photo-wrap img {
+    transform: scale(1);
+}
+
+.photo-caption {
+    margin-top: 32px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: all 1.2s 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.slide.active .photo-caption {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== TIMELINE CARD ===== */
+.tl-card {
+    background: rgba(14, 14, 20, 0.82);
+    border: 1px solid rgba(224, 107, 138, 0.22);
+    border-radius: 28px;
+    padding: 42px 36px;
+    max-width: 540px;
+    width: 100%;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    opacity: 0;
+    transform: translateY(50px) scale(0.96);
+    transition: all 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.slide.active .tl-card {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.tl-date {
+    color: var(--gold);
+    font-size: 0.88rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+.tl-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    margin-bottom: 16px;
+}
+.tl-text {
+    font-size: 1.08rem;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+/* ===== REASONS ===== */
+.reasons-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    max-width: 560px;
+    width: 100%;
+}
+.reason {
+    background: rgba(14, 14, 20, 0.88);
+    border: 1px solid rgba(224, 107, 138, 0.18);
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(36px);
+    transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.slide.active .reason:nth-child(1) { transition-delay: 0.3s; }
+.slide.active .reason:nth-child(2) { transition-delay: 0.45s; }
+.slide.active .reason:nth-child(3) { transition-delay: 0.6s; }
+.slide.active .reason:nth-child(4) { transition-delay: 0.75s; }
+.slide.active .reason:nth-child(5) { transition-delay: 0.9s; }
+.slide.active .reason:nth-child(6) { transition-delay: 1.05s; }
+.slide.active .reason {
+    opacity: 1;
+    transform: translateY(0);
+}
+.reason .num {
+    font-family: 'Playfair Display', serif;
+    color: var(--accent);
+    font-size: 1.35rem;
+    opacity: 0.65;
+    margin-bottom: 6px;
+}
+.reason h3 { font-size: 1.05rem; margin-bottom: 4px; }
+.reason p { font-size: 0.84rem; color: var(--muted); line-height: 1.4; }
+
+/* ===== LETTER ===== */
+.letter {
+    max-width: 560px;
+    width: 100%;
+    text-align: left;
+    font-size: 1.12rem;
+    line-height: 1.9;
+    color: var(--muted);
+}
+.letter p {
+    margin-bottom: 18px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.slide.active .letter p:nth-child(1) { transition-delay: 0.3s; }
+.slide.active .letter p:nth-child(2) { transition-delay: 0.55s; }
+.slide.active .letter p:nth-child(3) { transition-delay: 0.8s; }
+.slide.active .letter p:nth-child(4) { transition-delay: 1.05s; }
+.slide.active .letter p:nth-child(5) { transition-delay: 1.3s; }
+.slide.active .letter p:nth-child(6) { transition-delay: 1.55s; }
+.slide.active .letter p:nth-child(7) { transition-delay: 1.8s; }
+.slide.active .letter p {
+    opacity: 1;
+    transform: translateY(0);
+}
+.letter .sign {
+    font-style: italic;
+    color: var(--text);
+}
+
+/* ===== FINAL ===== */
+.final-heart {
+    font-size: 2.8rem;
+    margin-bottom: 22px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 1.2s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.slide.active .final-heart {
+    opacity: 1;
+    transform: scale(1);
+    animation: heartbeat 2.2s 1.4s ease-in-out infinite;
+}
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.18); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.12); }
+    60% { transform: scale(1); }
+}
+
+.days-count {
+    font-size: 1.15rem;
+    color: var(--muted);
+    margin-top: 28px;
+}
+.days-count strong {
+    color: var(--gold);
+    font-size: 1.7rem;
+    font-family: 'Playfair Display', serif;
+}
+
+/* ===== UI ===== */
+.progress-bar {
+    position: fixed; top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    z-index: 100;
+    width: 0%;
+    transition: width 0.15s linear;
+}
+
+.nav {
+    position: fixed;
+    bottom: 26px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 16px;
+    z-index: 50;
+    background: rgba(8, 8, 14, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 10px 18px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.07);
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+.nav.visible { opacity: 1; }
+
+.nav-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: transparent;
+    color: var(--text);
+    font-size: 1.15rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s;
+}
+.nav-btn:hover { background: var(--accent); border-color: var(--accent); }
+.nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+.dots { display: flex; gap: 7px; }
+.dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.22);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dot.active {
+    background: var(--accent);
+    width: 20px;
+    border-radius: 4px;
+}
+
+.auto-toggle {
+    position: fixed; top: 18px; right: 18px;
+    z-index: 50;
+    background: rgba(8, 8, 14, 0.7);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--muted);
+    padding: 8px 15px;
+    border-radius: 30px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    opacity: 0;
+}
+.auto-toggle.visible { opacity: 1; }
+.auto-toggle.on {
+    color: var(--accent);
+    border-color: rgba(224, 107, 138, 0.35);
+}
+
+/* ===== INTRO ===== */
+.intro {
+    position: fixed; inset: 0; z-index: 200;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.4s;
+}
+.intro.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.intro-btn {
+    margin-top: 48px;
+    padding: 17px 52px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-size: 1rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.35s;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: introIn 1.2s 1.1s forwards;
+}
+.intro-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 50px rgba(224, 107, 138, 0.4);
+}
+@keyframes introIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+.intro .date-label {
+    opacity: 0;
+    animation: introIn 1.2s 0.3s forwards;
+}
+.intro .big-title {
+    opacity: 0;
+    animation: introIn 1.3s 0.55s forwards;
+}
+.intro .subtitle {
+    opacity: 0;
+    animation: introIn 1.2s 0.85s forwards;
+}
+
+@media (max-width: 520px) {
+    .reasons-grid { grid-template-columns: 1fr; }
+    .photo-wrap { width: min(86vw, 340px); }
+    .nav { bottom: 16px; padding: 8px 14px; gap: 12px; }
+    .letter { font-size: 1.02rem; }
+    .tl-card { padding: 32px 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="vignette"></div>
+<canvas id="particles"></canvas>
+
+<!-- INTRO -->
+<div class="intro" id="intro">
+    <div class="date-label">12 октября 2025 — 12 октября 2026</div>
+    <h1 class="big-title">Ровно<br><span>1 год</span></h1>
+    <p class="subtitle">с того дня, как ты сказала «да»</p>
+    <button class="intro-btn" id="startBtn">Начать</button>
+</div>
+
+<div class="progress-bar" id="progress"></div>
+<button class="auto-toggle on" id="autoBtn">Авто ▶</button>
+
+<div class="slides" id="slides">
+
+    <!-- 0 Hero -->
+    <div class="slide tr-scale" data-duration="8500">
+        <div class="date-label reveal d1">12 октября 2026</div>
+        <h1 class="big-title reveal d2">Милка</h1>
+        <p class="subtitle reveal d3">Этот год — про нас</p>
+    </div>
+
+    <!-- 1 Start -->
+    <div class="slide tr-slide-up" data-duration="9000">
+        <div class="tl-card">
+            <div class="tl-date">26 сентября 2025</div>
+            <div class="tl-title">День, когда всё началось</div>
+            <p class="tl-text">Мы начали общаться. Я ещё не знал, насколько сильно ты изменишь мою жизнь.</p>
+        </div>
+    </div>
+
+    <!-- 2 Kiss date -->
+    <div class="slide tr-slide-up" data-duration="9000">
+        <div class="tl-card">
+            <div class="tl-date">10 октября 2025</div>
+            <div class="tl-title">Первый поцелуй</div>
+            <p class="tl-text">Время остановилось. Мир сузился до нас двоих.</p>
+        </div>
+    </div>
+
+    <!-- 3 Proposal -->
+    <div class="slide tr-slide-up" data-duration="9000">
+        <div class="tl-card">
+            <div class="tl-date">12 октября 2025</div>
+            <div class="tl-title">Ты сказала «да»</div>
+            <p class="tl-text">Я предложил тебе встречаться. Лучшее решение в моей жизни.</p>
+        </div>
+    </div>
+
+    <!-- 4 Photo kiss -->
+    <div class="slide tr-zoom" data-duration="9500">
+        <div class="photo-wrap">
+            <img src="milka-photos/04-kiss.jpg" alt="Поцелуй">
+        </div>
+        <div class="photo-caption">Один из наших поцелуев</div>
+    </div>
+
+    <!-- 5 Photo selfie -->
+    <div class="slide tr-zoom" data-duration="9500">
+        <div class="photo-wrap">
+            <img src="milka-photos/03-selfie.jpg" alt="Селфи">
+        </div>
+        <div class="photo-caption">Мы. Просто мы.</div>
+    </div>
+
+    <!-- 6 Photo portrait -->
+    <div class="slide tr-zoom" data-duration="9500">
+        <div class="photo-wrap">
+            <img src="milka-photos/02-portrait.jpg" alt="Портрет">
+        </div>
+        <div class="photo-caption">Ты</div>
+    </div>
+
+    <!-- 7 Photo cafe -->
+    <div class="slide tr-zoom" data-duration="9500">
+        <div class="photo-wrap">
+            <img src="milka-photos/05-cafe.jpg" alt="Кафе">
+        </div>
+        <div class="photo-caption">Моменты, которые хочется остановить</div>
+    </div>
+
+    <!-- 8 Photo bus -->
+    <div class="slide tr-zoom" data-duration="9500">
+        <div class="photo-wrap">
+            <img src="milka-photos/01-bus.jpg" alt="Остановка">
+        </div>
+        <div class="photo-caption">Даже обычные дни с тобой — особенные</div>
+    </div>
+
+    <!-- 9 Reasons -->
+    <div class="slide tr-fade" data-duration="13000">
+        <h2 class="big-title reveal d1" style="font-size: clamp(2.2rem, 8vw, 3.4rem); margin-bottom: 40px;">Почему ты</h2>
+        <div class="reasons-grid">
+            <div class="reason"><div class="num">01</div><h3>Твой смех</h3><p>Он лечит всё</p></div>
+            <div class="reason"><div class="num">02</div><h3>Твои глаза</h3><p>В них я вижу дом</p></div>
+            <div class="reason"><div class="num">03</div><h3>Понимание</h3><p>Без слов</p></div>
+            <div class="reason"><div class="num">04</div><h3>Сила и нежность</h3><p>Одновременно</p></div>
+            <div class="reason"><div class="num">05</div><h3>Обычные дни</h3><p>С тобой — особенные</p></div>
+            <div class="reason"><div class="num">06</div><h3>Просто ты</h3><p>Этого достаточно</p></div>
+        </div>
+    </div>
+
+    <!-- 10 Letter -->
+    <div class="slide tr-fade" data-duration="16000">
+        <div class="letter">
+            <p>Милка,</p>
+            <p>Ровно год назад, 12 октября, ты сказала «да».</p>
+            <p>А до этого было 26 сентября и 10 октября. Всё случилось быстро. И правильно.</p>
+            <p>С тобой я стал другим. Спокойнее. Смелее. Честнее.</p>
+            <p>Спасибо за каждый день этого года. За то, что выбираешь меня снова и снова.</p>
+            <p>Я буду рядом. В радости, в скуке, в бурях и в тишине.</p>
+            <p class="sign">Ещё на тысячу лет. Твой.</p>
+        </div>
+    </div>
+
+    <!-- 11 Final -->
+    <div class="slide tr-scale" data-duration="14000">
+        <div class="final-heart">❤</div>
+        <h1 class="big-title reveal d2">Я люблю тебя<br><span>Милка</span></h1>
+        <div class="days-count reveal d4">
+            Мы вместе уже <strong id="days">365</strong> дней
+        </div>
+        <p class="subtitle reveal d5" style="margin-top: 30px;">И это только начало</p>
+    </div>
+
+</div>
+
+<div class="nav" id="nav">
+    <button class="nav-btn" id="prevBtn">←</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="nextBtn">→</button>
+</div>
+
+<script>
+(() => {
+    /* ===== PARTICLES ===== */
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [];
+
+    function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+        constructor() { this.reset(true); }
+        reset(init = false) {
+            this.x = Math.random() * w;
+            this.y = init ? Math.random() * h : h + 30;
+            this.size = 1.5 + Math.random() * 3.5;
+            this.speed = 0.2 + Math.random() * 0.55;
+            this.opacity = 0.08 + Math.random() * 0.28;
+            this.vx = (Math.random() - 0.5) * 0.3;
+            this.type = Math.random() > 0.55 ? 'heart' : 'dot';
+        }
+        update() {
+            this.y -= this.speed;
+            this.x += this.vx;
+            if (this.y < -30) this.reset();
+        }
+        draw() {
+            ctx.globalAlpha = this.opacity;
+            if (this.type === 'heart') {
+                ctx.font = `${this.size * 3.2}px serif`;
+                ctx.fillStyle = '#e06b8a';
+                ctx.fillText('❤', this.x, this.y);
+            } else {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 0.55, 0, Math.PI * 2);
+                ctx.fillStyle = '#e0b87a';
+                ctx.fill();
+            }
+        }
+    }
+    for (let i = 0; i < 48; i++) particles.push(new Particle());
+    (function loop() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(loop);
+    })();
+
+    /* ===== SLIDES ===== */
+    const slides = [...document.querySelectorAll('.slide')];
+    const dotsBox = document.getElementById('dots');
+    const progress = document.getElementById('progress');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const autoBtn = document.getElementById('autoBtn');
+    const intro = document.getElementById('intro');
+    const startBtn = document.getElementById('startBtn');
+    const nav = document.getElementById('nav');
+
+    let current = -1;
+    let auto = true;
+    let timer = null;
+    let progressTimer = null;
+    let started = false;
+    let transitioning = false;
+
+    slides.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot';
+        d.addEventListener('click', () => { if (!transitioning) goTo(i); });
+        dotsBox.appendChild(d);
+    });
+    const dots = [...dotsBox.querySelectorAll('.dot')];
+
+    function goTo(index) {
+        if (index < 0 || index >= slides.length || index === current || transitioning) return;
+        transitioning = true;
+
+        const prev = current;
+        if (prev >= 0) {
+            slides[prev].classList.add('exit');
+            slides[prev].classList.remove('active');
+        }
+
+        current = index;
+        const slide = slides[current];
+        // force reflow so transition plays
+        void slide.offsetWidth;
+        slide.classList.remove('exit');
+        slide.classList.add('active');
+
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === slides.length - 1;
+
+        setTimeout(() => {
+            if (prev >= 0) slides[prev].classList.remove('exit');
+            transitioning = false;
+        }, 1700);
+
+        resetAuto();
+    }
+
+    function next() {
+        if (current < slides.length - 1) goTo(current + 1);
+        else if (auto) goTo(0);
+    }
+    function prev() {
+        if (current > 0) goTo(current - 1);
+    }
+
+    function resetAuto() {
+        clearTimeout(timer);
+        clearInterval(progressTimer);
+        progress.style.width = '0%';
+        if (!auto || !started) return;
+
+        const duration = parseInt(slides[current].dataset.duration) || 9000;
+        let elapsed = 0;
+        const step = 40;
+
+        progressTimer = setInterval(() => {
+            elapsed += step;
+            progress.style.width = Math.min(100, (elapsed / duration) * 100) + '%';
+            if (elapsed >= duration) clearInterval(progressTimer);
+        }, step);
+
+        timer = setTimeout(next, duration);
+    }
+
+    function toggleAuto() {
+        auto = !auto;
+        autoBtn.classList.toggle('on', auto);
+        autoBtn.textContent = auto ? 'Авто ▶' : 'Авто ❚❚';
+        if (auto) resetAuto();
+        else {
+            clearTimeout(timer);
+            clearInterval(progressTimer);
+            progress.style.width = '0%';
+        }
+    }
+
+    prevBtn.addEventListener('click', () => { if (!transitioning) prev(); });
+    nextBtn.addEventListener('click', () => { if (!transitioning) next(); });
+    autoBtn.addEventListener('click', toggleAuto);
+
+    document.addEventListener('keydown', e => {
+        if (!started || transitioning) return;
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+    });
+
+    let touchX = 0;
+    document.addEventListener('touchstart', e => { touchX = e.changedTouches[0].screenX; }, { passive: true });
+    document.addEventListener('touchend', e => {
+        if (!started || transitioning) return;
+        const dx = e.changedTouches[0].screenX - touchX;
+        if (Math.abs(dx) > 55) dx < 0 ? next() : prev();
+    }, { passive: true });
+
+    startBtn.addEventListener('click', () => {
+        intro.classList.add('hidden');
+        started = true;
+        nav.classList.add('visible');
+        autoBtn.classList.add('visible');
+
+        const startDate = new Date('2025-10-12');
+        const today = new Date();
+        document.getElementById('days').textContent =
+            Math.ceil(Math.abs(today - startDate) / 86400000);
+
+        setTimeout(() => goTo(0), 400);
+    });
+
+    // preload
+    ['01-bus','02-portrait','03-selfie','04-kiss','05-cafe'].forEach(n => {
+        const img = new Image();
+        img.src = 'milka-photos/' + n + '.jpg';
+    });
+})();
+</script>
+</body>
+</html>
